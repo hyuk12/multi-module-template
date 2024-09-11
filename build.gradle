@@ -7,6 +7,25 @@ plugins {
 group = 'com.multi'
 version = '0.0.1-SNAPSHOT'
 
+apply plugin: 'org.springframework.boot'
+apply plugin: 'io.spring.dependency-management'
+
+repositories {
+	// 외부 라이브러리를 다운로드할 저장소 추가
+	mavenCentral()
+}
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter'
+	implementation project(':api')
+	implementation project(':middleware')
+	implementation project(':data-storage')
+	compileOnly 'org.projectlombok:lombok'
+	annotationProcessor 'org.projectlombok:lombok'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
 subprojects {
 	apply plugin: 'java'
 	apply plugin: 'org.springframework.boot'
@@ -27,9 +46,28 @@ subprojects {
 	}
 }
 
-project(':api') {}
-project(':middleware') {}
-project(':data-storage') {}
+project(':api') {
+	dependencies {
+		implementation 'org.springframework.boot:spring-boot-starter-web'
+		implementation project(':data-storage')
+		developmentOnly 'org.springframework.boot:spring-boot-devtools'
+	}
+}
+project(':middleware') {
+	dependencies {
+		implementation 'org.springframework.boot:spring-boot-starter-amqp'
+		implementation 'org.springframework.amqp:spring-rabbit-stream'
+		implementation project(':data-storage')
+		testImplementation 'org.springframework.amqp:spring-rabbit-test'
+	}
+}
+project(':data-storage') {
+	dependencies {
+		implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+		implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+		runtimeOnly 'org.postgresql:postgresql'
+	}
+}
 
 tasks.named('test') {
 	useJUnitPlatform()
